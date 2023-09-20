@@ -11,8 +11,9 @@ import pandas
 app = Flask(__name__)
 
 formats = {
-    "gpx": {"extension": "gpx", "driver": "GPX"},
-    "gpkg": {"extension": "gpkg", "driver": "GPKG"},
+    "gpkg": {"name": "GeoPackage", "extension": "gpkg", "driver": "GPKG"},
+    "geojson": {"name": "GeoJSON", "extension": "geojson", "driver": "GeoJSON"},
+    "gpx": {"name": "GPS Exchange Format", "extension": "gpx", "driver": "GPX"},
 }
 
 
@@ -25,19 +26,19 @@ def index():
 @app.get("/merge-gpx-tracks")
 def get_merge_gpx_tracks():
     """Renders Merge GPX Tracks form"""
-    return render_template("merge-gpx-tracks.html")
+    return render_template("merge-gpx-tracks.html", formats=formats)
 
 
 @app.post("/merge-gpx-tracks")
 def post_merge_gpx_tracks():
     """Processes Merge GPX Tracks form"""
+    files = request.files.getlist("files")
+    extension = formats[request.form["format"]]["extension"]
+    driver = formats[request.form["format"]]["driver"]
+
     merged_tracks = geopandas.GeoDataFrame(
         columns=["name", "type", "geometry"], geometry="geometry"
     )
-
-    files = request.files.getlist("files")
-    merged_filename = f"merged.{formats[request.form['format']]['extension']}"
-    driver = formats[request.form["format"]]["driver"]
 
     for filename in files:
         tracks = geopandas.read_file(filename, layer="tracks")
@@ -46,6 +47,7 @@ def post_merge_gpx_tracks():
         )
 
     with tempfile.TemporaryDirectory() as temp_dir:
+        merged_filename = f"merged.{extension}"
         merged_file = Path(temp_dir) / merged_filename
 
         merged_tracks.to_file(merged_file, driver=driver)
