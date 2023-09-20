@@ -5,7 +5,7 @@
 {% block content %}
 <h1>Merge GPX Tracks</h1>
 
-<p class="lead">Merge tracks from multiple GPX files into multiple tracks in just one GPX file</p>
+<p class="lead">Merge tracks from multiple GPX files into multiple tracks in just one file</p>
 
 <form action="/merge-gpx-tracks" method="POST" enctype="multipart/form-data">
     <div class="mb-3">
@@ -13,6 +13,23 @@
         <input type="file" id="files" name="files" multiple accept=".gpx" required class="form-control"/>
     </div>
 
-    <button type="submit" class="btn btn-primary">Merge GPX Tracks</button>
+    <div class="mb-3">
+        <label>Output File Format</label>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="format" id="gpx" value="gpx" required checked>
+            <label class="form-check-label" for="gpx">
+                GPX
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="format" id="gpkg" value="gpkg">
+            <label class="form-check-label" for="gpkg">
+                GeoPackage
+            </label>
+        </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">Merge Tracks</button>
 </form>
 {% endblock %}

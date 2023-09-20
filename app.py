@@ -10,6 +10,11 @@ import pandas
 
 app = Flask(__name__)
 
+formats = {
+    "gpx": {"extension": "gpx", "driver": "GPX"},
+    "gpkg": {"extension": "gpkg", "driver": "GPKG"},
+}
+
 
 @app.route("/")
 def index():
@@ -31,6 +36,8 @@ def post_merge_gpx_tracks():
     )
 
     files = request.files.getlist("files")
+    merged_filename = f"merged.{formats[request.form['format']]['extension']}"
+    driver = formats[request.form["format"]]["driver"]
 
     for filename in files:
         tracks = geopandas.read_file(filename, layer="tracks")
@@ -39,7 +46,7 @@ def post_merge_gpx_tracks():
         )
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        temp_dir = Path(temp_dir)
-        merged_tracks.to_file(temp_dir / "merged.gpx", driver="GPX")
+        merged_file = Path(temp_dir) / merged_filename
 
-        return send_file(temp_dir / "merged.gpx")
+        merged_tracks.to_file(merged_file, driver=driver)
+        return send_file(merged_file)
