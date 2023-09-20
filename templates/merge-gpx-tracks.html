@@ -10,7 +10,7 @@
 <form action="/merge-gpx-tracks" method="POST" enctype="multipart/form-data">
     <div class="mb-3">
         <label for="files">GPX Files</label>
-        <input type="file" id="files" name="files" multiple class="form-control"/>
+        <input type="file" id="files" name="files" multiple accept=".gpx" required class="form-control"/>
     </div>
 
     <button type="submit" class="btn btn-primary">Merge GPX Tracks</button>
