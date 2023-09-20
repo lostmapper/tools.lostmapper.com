@@ -17,10 +17,16 @@ formats = {
 }
 
 
-@app.route("/")
+@app.get("/")
 def index():
-    """Renders the index page"""
+    """Renders the Welcome page"""
     return render_template("index.html")
+
+
+@app.get("/about")
+def about():
+    """Renders the About page"""
+    return render_template("about.html")
 
 
 @app.get("/merge-gpx-tracks")
@@ -47,8 +53,7 @@ def post_merge_gpx_tracks():
         )
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        merged_filename = f"merged.{extension}"
-        merged_file = Path(temp_dir) / merged_filename
+        merged_file = Path(temp_dir) / f"merged.{extension}"
 
         merged_tracks.to_file(merged_file, driver=driver)
         return send_file(merged_file)
