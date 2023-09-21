@@ -1,31 +1,29 @@
 {% extends 'layout.html' %}
 
 {% block title %}Merge GPX Tracks{% endblock %}
+{% block description %}Merge tracks from multiple GPX files into multiple tracks into just one file{% endblock %}
 
 {% block content %}
-<h1>Merge GPX Tracks</h1>
-
-<p class="lead">Merge tracks from multiple GPX files into multiple tracks in just one file</p>
-
-<form action="/merge-gpx-tracks" method="POST" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label for="files">GPX Files</label>
-        <input type="file" id="files" name="files" multiple accept=".gpx" required class="form-control"/>
-    </div>
-
-    <div class="mb-3">
-        <label>Output File Format</label>
-        {% for format in formats -%}
-        <div class="form-check">
-            <input class="form-check-input" type="radio" name="format" id="{{ format }}" value="{{ format }}" required
-                   checked>
-            <label class="form-check-label" for="{{ format }}">
-                {{ formats[format].name }} (merged.{{ formats[format].extension }})
-            </label>
+    <form action="/merge-gpx-tracks" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="files">GPX Files</label>
+            <input type="file" id="files" name="files" multiple accept=".gpx" required class="form-control"/>
         </div>
-        {% endfor %}
-    </div>
 
-    <button type="submit" class="btn btn-primary">Merge Tracks</button>
-</form>
+        <div class="mb-3">
+            <label>Output File Format</label>
+            {% for format in formats -%}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="format" id="{{ format }}" value="{{ format }}"
+                           required
+                           checked>
+                    <label class="form-check-label" for="{{ format }}">
+                        {{ formats[format].name }} (merged.{{ formats[format].extension }})
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Merge Tracks</button>
+    </form>
 {% endblock %}
