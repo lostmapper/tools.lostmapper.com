@@ -39,8 +39,12 @@ def get_merge_gpx_tracks():
 def post_merge_gpx_tracks():
     """Processes Merge GPX Tracks form"""
     files = request.files.getlist("files")
-    extension = formats[request.form["format"]]["extension"]
-    driver = formats[request.form["format"]]["driver"]
+    output_format = request.form["format"]
+    extension = formats[output_format]["extension"]
+    driver = formats[output_format]["driver"]
+
+    app.logger.info("%i files submitted for %s output", len(files), output_format)
+    app.logger.info("%f kilobytes received", request.content_length / 1024)
 
     merged_tracks = geopandas.GeoDataFrame(
         columns=["name", "type", "geometry"], geometry="geometry"
