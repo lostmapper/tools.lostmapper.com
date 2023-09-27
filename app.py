@@ -76,8 +76,8 @@ def post_merge_gpx_tracks():
             ]
         )
 
-    # The GPX driver requires the "number" column to be an integer, not a string
-    merged_tracks["number"] = pandas.to_numeric(merged_tracks["number"])
+    if output_format == "gpx":
+        merged_tracks["number"] = range(1, len(merged_tracks) + 1)
 
     with tempfile.TemporaryDirectory() as temp_dir:
         merged_file = str(Path(temp_dir) / f"merged.{extension}")
