@@ -46,15 +46,37 @@ def post_merge_gpx_tracks():
     app.logger.info("%i files submitted for %s output", len(files), output_format)
     app.logger.info("%f kilobytes received", request.content_length / 1024)
 
+    columns = [
+        "name",
+        "cmt",
+        "desc",
+        "src",
+        "link1_href",
+        "link1_text",
+        "link1_type",
+        "link2_href",
+        "link2_text",
+        "link2_type",
+        "number",
+        "type",
+        "geometry",
+    ]
+
     merged_tracks = geopandas.GeoDataFrame(
-        columns=["name", "type", "geometry"], geometry="geometry"
+        columns=columns,
+        geometry="geometry",
     )
 
     for filename in files:
         tracks = geopandas.read_file(filename, layer="tracks")
         merged_tracks = pandas.concat(
-            [merged_tracks, tracks[["name", "type", "geometry"]]]
+            [
+                merged_tracks,
+                tracks[columns],
+            ]
         )
+
+    merged_tracks["number"] = pandas.to_numeric(merged_tracks["number"])
 
     with tempfile.TemporaryDirectory() as temp_dir:
         merged_file = Path(temp_dir) / f"merged.{extension}"
