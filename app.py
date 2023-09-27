@@ -10,11 +10,27 @@ import pandas
 
 app = Flask(__name__)
 
-formats = {
+MERGE_GPX_FORMATS = {
     "gpkg": {"name": "GeoPackage", "extension": "gpkg", "driver": "GPKG"},
     "geojson": {"name": "GeoJSON", "extension": "geojson", "driver": "GeoJSON"},
     "gpx": {"name": "GPS Exchange Format", "extension": "gpx", "driver": "GPX"},
 }
+
+MERGE_GPX_COLUMNS = [
+    "name",
+    "cmt",
+    "desc",
+    "src",
+    "link1_href",
+    "link1_text",
+    "link1_type",
+    "link2_href",
+    "link2_text",
+    "link2_type",
+    "number",
+    "type",
+    "geometry",
+]
 
 
 @app.get("/")
@@ -32,7 +48,7 @@ def about():
 @app.get("/merge-gpx-tracks")
 def get_merge_gpx_tracks():
     """Renders Merge GPX Tracks form"""
-    return render_template("merge-gpx-tracks.html", formats=formats)
+    return render_template("merge-gpx-tracks.html", formats=MERGE_GPX_FORMATS)
 
 
 @app.post("/merge-gpx-tracks")
@@ -40,30 +56,14 @@ def post_merge_gpx_tracks():
     """Processes Merge GPX Tracks form"""
     files = request.files.getlist("files")
     output_format = request.form["format"]
-    extension = formats[output_format]["extension"]
-    driver = formats[output_format]["driver"]
+    extension = MERGE_GPX_FORMATS[output_format]["extension"]
+    driver = MERGE_GPX_FORMATS[output_format]["driver"]
 
     app.logger.info("%i files submitted for %s output", len(files), output_format)
     app.logger.info("%f kilobytes received", request.content_length / 1024)
 
-    columns = [
-        "name",
-        "cmt",
-        "desc",
-        "src",
-        "link1_href",
-        "link1_text",
-        "link1_type",
-        "link2_href",
-        "link2_text",
-        "link2_type",
-        "number",
-        "type",
-        "geometry",
-    ]
-
     merged_tracks = geopandas.GeoDataFrame(
-        columns=columns,
+        columns=MERGE_GPX_COLUMNS,
         geometry="geometry",
     )
 
@@ -72,14 +72,15 @@ def post_merge_gpx_tracks():
         merged_tracks = pandas.concat(
             [
                 merged_tracks,
-                tracks[columns],
+                tracks[MERGE_GPX_COLUMNS],
             ]
         )
 
+    # The GPX driver requires the "number" column to be an integer, not a string
     merged_tracks["number"] = pandas.to_numeric(merged_tracks["number"])
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        merged_file = Path(temp_dir) / f"merged.{extension}"
+        merged_file = str(Path(temp_dir) / f"merged.{extension}")
 
         merged_tracks.to_file(merged_file, driver=driver)
         return send_file(merged_file)
